@@ -2,11 +2,16 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
+
+
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
 
 def generate():
-    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
 
@@ -33,14 +38,44 @@ def save():
     website_data = website_entry.get()
     email_data = username_entry.get()
     password_data = password_entry.get()
+    new_data = {website_data: {
+        "user": email_data,
+        "password": password_data
+    }}
+
     if len(website_data) == 0 or len(email_data) == 0 or len(password_data) == 0:
         messagebox.showwarning(title="Oops", message="Please don't leave any fields empty!")
     else:
-        with open("data.txt", "a") as data:
-            data.write(f"{website_data} | {email_data} | {password_data}\n")
+        try:
+            with open("data.json", "r") as data_file:
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("data.json", "w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            data.update(new_data)
+            with open("data.json", "w") as data_file:
+                json.dump(data, data_file, indent=4)
+        finally:
             website_entry.delete(0, END)
             username_entry.delete(0, END)
             password_entry.delete(0, END)
+
+
+def search():
+    website_data = website_entry.get()
+    try:
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showwarning(title="Oops", message="There's no data to search!")
+    else:
+        if website_data in data:
+            email = data[website_data]["user"]
+            password = data[website_data]["password"]
+            messagebox.showinfo(title=website_data, message=f"Email: {email}\nPassword: {password}")
+        else:
+            messagebox.showwarning(title="Oops", message=f"There's no {website_data} data!")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -53,7 +88,6 @@ pass_img = PhotoImage(file="logo.png")
 canvas.create_image(100, 100, image=pass_img)
 canvas.grid(column=1, row=0)
 
-
 # Label
 website_label = Label(text="Website:")
 website_label.grid(column=0, row=1)
@@ -63,17 +97,19 @@ password_label = Label(text="Password:")
 password_label.grid(column=0, row=3)
 
 # Entry
-website_entry = Entry(width=35)
-website_entry.grid(column=1, row=1, columnspan=2)
-username_entry = Entry(width=35)
+website_entry = Entry(width=20)
+website_entry.grid(column=1, row=1)
+username_entry = Entry(width=36)
 username_entry.grid(column=1, row=2, columnspan=2)
-password_entry = Entry(width=21)
+password_entry = Entry(width=20)
 password_entry.grid(column=1, row=3)
 
 # Button
-generate_button = Button(text="Generate Password", command=generate)
+search_button = Button(text="Search", command=search, width=12)
+search_button.grid(column=2, row=1)
+generate_button = Button(text="Generate Password", command=generate, width=12)
 generate_button.grid(column=2, row=3)
-add_button = Button(text="Add", width=36, command=save)
+add_button = Button(text="Add", width=34, command=save)
 add_button.grid(column=1, row=4, columnspan=2)
 
 window.mainloop()
