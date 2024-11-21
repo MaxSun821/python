@@ -1,19 +1,17 @@
 from tkinter import *
 import pandas
 import random
-import time
 
 BACKGROUND_COLOR = "#B1DDC6"
 LANGUAGE_FONT = ("Ariel", 40, "italic")
 WORDS_FONT = ("Ariel", 60, "bold")
 
 # Read file
-
 try:
     data = pandas.read_csv("./data/words_to_learn.csv")
 except FileNotFoundError:
     data = pandas.read_csv("./data/flash_card_data.csv")
-else:
+finally:
     data_dict = data.to_dict(orient="records")
     current_card = {}
 
@@ -37,7 +35,7 @@ def change_card():
 
 def remember():
     data_dict.remove(current_card)
-    print(len(data_dict))
+    # print(len(data_dict))
     new_data = pandas.DataFrame(data_dict)
     new_data.to_csv("./data/words_to_learn.csv")
     next_word()
