@@ -5,15 +5,19 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 LANGUAGE_FONT = ("Ariel", 40, "italic")
 WORDS_FONT = ("Ariel", 60, "bold")
+WAIT_TIME = 3000
+
+data_dict = {}
+current_card = {}
 
 # Read file
 try:
     data = pandas.read_csv("./data/words_to_learn.csv")
 except FileNotFoundError:
-    data = pandas.read_csv("./data/flash_card_data.csv")
-finally:
+    origin_data = pandas.read_csv("./data/flash_card_data.csv")
+    data_dict = origin_data.to_dict(orient="records")
+else:
     data_dict = data.to_dict(orient="records")
-    current_card = {}
 
 
 # change word function
@@ -24,7 +28,7 @@ def next_word():
     canvas.itemconfig(card_canvas, image=card_front_img)
     canvas.itemconfig(language_text, text="German", fill="black")
     canvas.itemconfig(words_text, text=current_card["German"], fill="black")
-    wait = window.after(3000, change_card)
+    wait = window.after(WAIT_TIME, change_card)
 
 
 def change_card():
@@ -37,14 +41,14 @@ def remember():
     data_dict.remove(current_card)
     # print(len(data_dict))
     new_data = pandas.DataFrame(data_dict)
-    new_data.to_csv("./data/words_to_learn.csv")
+    new_data.to_csv("./data/words_to_learn.csv", index=False)
     next_word()
 
 
 window = Tk()
 window.title("Flashy")
 window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
-wait = window.after(3000, change_card)
+wait = window.after(WAIT_TIME, change_card)
 
 
 # Image
