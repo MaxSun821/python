@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TARGET_PRICE = 100
-url = "https://appbrewery.github.io/instant_pot/"
+url = "https://www.amazon.com/dp/B075CYMYK6?psc=1&ref_=cm_sw_r_cp_ud_ct_FM9M699VKHTT47YD50Q6"
 
 # headers
 header = {
@@ -15,8 +15,7 @@ header = {
 }
 
 response = requests.get(url, headers=header)
-web_info = response.content
-soup = BeautifulSoup(web_info, "html.parser")
+soup = BeautifulSoup(response.content, "html.parser")
 
 price_text = soup.find(class_="a-offscreen").get_text()
 price = float(price_text.split("$")[1])
@@ -26,7 +25,7 @@ print(title)
 
 if price < TARGET_PRICE:
     message = f"{title} is on sale for {price}!"
-    with smtplib.SMTP(os.environ["smtp_server"], port=587) as connection:
+    with smtplib.SMTP(os.environ["smtp_server"]) as connection:
         connection.starttls()
         connection.login(user=os.environ["EMAIL"], password=os.environ["PASSWORD"])
         connection.sendmail(
